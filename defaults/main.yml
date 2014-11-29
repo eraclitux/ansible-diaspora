@@ -1,0 +1,9 @@
+---
+diaspora_rails_environment: production
+diaspora_public_dir: /home/diaspora/diaspora/public
+# FIXME because Diaspora bug ./script/server wil not work if we checkout using a commit or a tag (see line 106). This makes installation non predictable.
+# v0.4.1.2
+diaspora_version: master
+diaspora_ssl_certificate_path: /etc/ssl/private/diaspora_cert.crt
+diaspora_ssl_certificate_key_path: /etc/ssl/private/diaspora_cert.key
+diaspora_dhparam_file: /etc/ssl/private/dhparam.pem

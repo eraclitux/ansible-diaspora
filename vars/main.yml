@@ -1,0 +1,27 @@
+---
+
+diaspora_common_packages:
+  - build-essential 
+  - ca-certificates
+  - git 
+  - curl 
+  - imagemagick 
+  - libmagickwand-dev 
+  - nodejs 
+  - libcurl4-openssl-dev 
+  - libxml2-dev 
+  - libxslt1-dev 
+  - libmysqlclient-dev
+  - mysql-server 
+  - redis-server 
+  - nginx
+  - libreadline6-dev
+  - libyaml-dev
+  - libsqlite3-dev
+  - sqlite3
+  - autoconf
+  - libgdbm-dev
+  - libncurses5-dev
+  - automake
+  - bison 
+  - libffi-dev

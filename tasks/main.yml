@@ -1,0 +1,121 @@
+---
+# TODO rotate logs
+# TODO parametrize develop/production installation
+# TODO add password to mysql user
+- fail: msg="It's not Ubuntu >= 14"
+  when: ansible_distribution != "Ubuntu" or ansible_distribution_major_version|int < 12
+
+- fail: msg="diaspora_url variable not set"
+  when: diaspora_url is not defined
+
+- name: install packages for ppa management
+  apt: name=python-software-properties state=present update_cache=yes
+  when: ansible_distribution_version == "12.04"
+
+- name: add curl ppa
+  command: "apt-add-repository -y ppa:jaywink/curldebian"
+  when: ansible_distribution_version == "12.04"
+
+- name: add redis ppa
+  command: "apt-add-repository -y ppa:chris-lea/redis-server"
+  when: ansible_distribution_version == "12.04"
+  
+- name: install common required packages
+  apt: name={{ item }} state=present update_cache=yes
+  with_items: diaspora_common_packages
+
+  # 12.04 rvm requirements 
+- name: install 12.04 required packages
+  apt: name=gawk state=present
+  when: ansible_distribution_version == "12.04"
+
+  # upgrade to curl 7.32 
+- name: upgrade packages
+  apt: upgrade=dist update_cache=yes
+  when: ansible_distribution_version == "12.04"
+
+- name: add diaspora user
+  user: name=diaspora shell=/bin/bash state=present
+
+- name: add rvm to bashrc
+  lineinfile: dest=/home/diaspora/.bashrc line='[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'
+  register: bashrc
+
+- name: add rvm gpg key
+  sudo: yes
+  sudo_user: diaspora
+  command: "gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3"
+  when: bashrc|changed
+
+- name: download & execute RVM installation script
+  sudo: yes
+  sudo_user: diaspora
+  shell: "curl -L dspr.tk/1t | bash"
+  when: bashrc|changed
+
+# This will build ruby from source in 14.04
+- name: install ruby 2
+  sudo: yes
+  sudo_user: diaspora
+  command: "/home/diaspora/.rvm/bin/rvm install 2.0"
+  when: bashrc|changed
+
+- name: set default ruby version
+  sudo: yes
+  sudo_user: diaspora
+  shell: source ~/.rvm/scripts/rvm && rvm alias create default ruby-2.0.0-p598 executable=/bin/bash chdir=~
+  when: bashrc|changed
+
+- git: repo=git://github.com/diaspora/diaspora.git dest=/home/diaspora/diaspora version={{ diaspora_version }} accept_hostkey=yes
+  sudo: yes
+  sudo_user: diaspora
+  register: gitrepo
+
+- name: generate dhparam.pem
+  shell: openssl dhparam 2048 > {{ diaspora_dhparam_file }}
+  when: bashrc|changed
+
+- name: chmod dhparam.pem
+  file: path={{ diaspora_dhparam_file }} owner=www-data group=www-data mode=0640
+
+- name: deploy diaspora configuration files
+  template: src="{{ item }}.j2" dest="/home/diaspora/diaspora/config/{{ item }}" backup=yes
+  with_items:
+  - database.yml
+  - diaspora.yml
+  - schedule.rb
+
+- name: copy SSL certificate and key
+  copy: src={{ item }} dest=/etc/ssl/private/{{ item }} owner=www-data mode=600 backup=yes
+  notify:
+  - restart nginx
+  with_items:
+  - diaspora_cert.key
+  - diaspora_cert.crt
+
+- name: deploy nginx configuration files
+  template: src=nginx_{{ ansible_distribution_major_version }}.conf.j2 dest=/etc/nginx/nginx.conf backup=yes
+  notify:
+  - restart nginx
+
+- name: bundle install 
+  sudo: yes
+  sudo_user: diaspora
+  shell: source ~/.rvm/scripts/rvm && bundle install --without test development executable=/bin/bash chdir=~/diaspora
+  environment:
+    RAILS_ENV: production
+  when: gitrepo|changed
+
+- name: setup database
+  sudo: yes
+  sudo_user: diaspora
+  shell: source ~/.rvm/scripts/rvm && bundle exec rake db:create db:schema:load executable=/bin/bash chdir=~/diaspora
+  environment:
+    RAILS_ENV: production
+  when: gitrepo|changed
+
+- name: precompile assets
+  sudo: yes
+  sudo_user: diaspora
+  shell: source ~/.rvm/scripts/rvm && bundle exec rake assets:precompile executable=/bin/bash chdir=~/diaspora
+  when: gitrepo|changed

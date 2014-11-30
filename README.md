@@ -1,13 +1,13 @@
 Ansible Diaspora
 ----------------
 Ansible role to install and configure a Diaspora pod on a single machine. 
-
+This role automates [official installation instructions](https://wiki.diasporafoundation.org/Installation/Ubuntu/Precise).
 Can be used to modify and deploy configuration files in `/templates`. When modified they trigger restart of appropriate services.
 
 Not suitable for Diaspora's upgrades.
 
-Example
--------
+Example Playbook
+----------------
 First of all put certificates files (.crt ank .key) in role's `files` dir **or your production installation wont't work!**
 
 Than create a playbook with these lines:
@@ -19,8 +19,8 @@ Than create a playbook with these lines:
 Varialble `diaspora_url` must be specified per host. Easiest place to do so is in inventory file:
 ```
         [diaspora-pods]
-        targetmachine1.net diaspora_url-pod.ofmine.tld
-        targetmachine2.net diaspora_url-anotherpod.ofmine.tld
+        targetmachine1.net diaspora_url=pod.ofmine.tld
+        targetmachine2.net diaspora_url=anotherpod.ofmine.tld
 ```
 Now installing Diaspora is as easy as running (better in `screen` as it takes time):
 ```
@@ -31,8 +31,8 @@ After installation is finished login to remote server and issue:
         # sudo -i -u diaspora
         $ ./diaspora/script/server
 ```
-Variables
----------
+Role Variables
+--------------
 - diaspora_version
 
 Git tag of version to install. Default master.

@@ -90,8 +90,8 @@
   notify:
   - restart nginx
   with_items:
-  - diaspora_cert.key
-  - diaspora_cert.crt
+  - "{{ diaspora_url }}.key"
+  - "{{ diaspora_url }}.crt"
 
 - name: deploy nginx configuration files
   template: src=nginx_{{ ansible_distribution_major_version }}.conf.j2 dest=/etc/nginx/nginx.conf backup=yes

@@ -91,8 +91,8 @@ http {
         # SSL setup
         # This file should also include any necessary intermediate certificates
         # For example for StartSSL that would be https://www.startssl.com/certs/class1/sha2/pem/sub.class1.server.sha2.ca.pem
-        ssl_certificate {{ diaspora_ssl_certificate_path }};
-        ssl_certificate_key {{ diaspora_ssl_certificate_key_path }};
+        ssl_certificate {{ diaspora_ssl_certificate_path }}/{{ diaspora_url }}.crt;
+        ssl_certificate_key {{ diaspora_ssl_certificate_key_path }}/{{ diaspora_url }}.key;
         # Taken from https://wiki.mozilla.org/Security/Server_Side_TLS
         # generate with openssl dhparam 2048 > /path/to/dhparam.pem
         ssl_dhparam {{ diaspora_dhparam_file }};
@@ -115,8 +115,8 @@ http {
         # SSL setup
         # This file should also include any necessary intermediate certificates
         # For example for StartSSL that would be https://www.startssl.com/certs/class1/sha2/pem/sub.class1.server.sha2.ca.pem
-        ssl_certificate {{ diaspora_ssl_certificate_path }};
-        ssl_certificate_key {{ diaspora_ssl_certificate_key_path }};
+        ssl_certificate {{ diaspora_ssl_certificate_path }}/{{ diaspora_url }}.crt;
+        ssl_certificate_key {{ diaspora_ssl_certificate_key_path }}/{{ diaspora_url }}.key;
         # Taken from https://wiki.mozilla.org/Security/Server_Side_TLS
         # You might want to make these global
         # generate with openssl dhparam 2048 > /path/to/dhparam.pem

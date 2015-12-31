@@ -10,13 +10,13 @@ Example Playbook
 ----------------
 First of all put certificates files (.crt ank .key) in role's `files` dir **or your production installation wont't work!**
 
-Than create a playbook with these lines:
+Than create a playbook (e.g. `diaspora.yml`) with these lines:
 ```
         - hosts: diaspora-pods 
           roles:
           - diaspora
 ```
-Varialble `diaspora_url` must be specified per host. Easiest place to do so is in inventory file:
+Variable `diaspora_url` must be specified per host. Easiest place to do so is in the inventory file (usually `/etc/ansible/hosts`):
 ```
         [diaspora-pods]
         targetmachine1.net diaspora_url=pod.ofmine.tld
@@ -24,8 +24,11 @@ Varialble `diaspora_url` must be specified per host. Easiest place to do so is i
 ```
 Now installing Diaspora is as easy as running (better in `screen` as it takes time):
 ```
-        $ ansible-playbook diaspora.yml
+        $ ansible-playbook diaspora.yml -u <username> -i <inventory_file>
 ```
+`<username>` is the user which should run the installation (e.g. `root`), `<inventory_file>` specifies the inventory host file.
+
+
 After installation is finished login to remote server and issue:
 ```
         # sudo -i -u diaspora
